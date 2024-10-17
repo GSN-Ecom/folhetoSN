@@ -72,7 +72,7 @@ uploadButton.addEventListener('click', async function() {
     for (const file of files) {
         const base64 = await getBase64(file);
         try {
-            const response = await fetch(`https://api.github.com/repos/seu-usuario/imagem-upload/contents/folheto-sn/${file.name}`, {
+            const response = await fetch(`https://api.github.com/repos/GSN-Ecom/folhetoSN/contents/folheto-sn/${file.name}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': 'token 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', // Seu token de acesso
