@@ -75,7 +75,7 @@ uploadButton.addEventListener('click', async function() {
             const response = await fetch(`https://api.github.com/repos/GSN-Ecom/folhetoSN/contents/folheto-sn/${file.name}`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': 'token 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', // Seu token de acesso
+                    'Authorization': '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', // Seu token de acesso
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
