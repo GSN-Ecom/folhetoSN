@@ -68,7 +68,7 @@ async function uploadImage(file, base64) {
         const response = await fetch(`https://api.github.com/repos/GSN-Ecom/folhetoSN/contents/folheto-sn/${file.name}`, {
             method: 'PUT',
             headers: {
-                'Authorization': 'token SEU_TOKEN_DE_ACESSO', // Substitua pelo seu token
+                'Authorization': 'token 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', // Seu token aqui
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
