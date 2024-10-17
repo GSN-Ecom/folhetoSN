@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload de Imagens</title>
+    <style>
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .drop-area {
+            border: 2px dashed #008CBA;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 10px 0;
+            transition: background-color 0.3s;
+        }
+        .drop-area.hover {
+            background-color: #f0f8ff;
+        }
+        .thumbnail {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enviar Imagens</h1>
+    <div id="drop-area" class="drop-area">
+        <p>Arraste e solte suas imagens aqui ou clique para selecionar arquivos.</p>
+    </div>
+    <input type="file" id="images" accept="image/*" multiple required style="display:none;">
+    <button id="upload-button" style="display:none;">Enviar</button>
+    <div id="file-list"></div>
+    <div id="result"></div>
+
+    <script src="js/upload-image-folheto-sn.js"></script>
+</body>
+</html>
