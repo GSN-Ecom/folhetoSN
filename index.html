@@ -31,15 +31,15 @@
     </style>
 </head>
 <body>
-    <h1>Enviar Imagens</h1>
-    <div id="drop-area" class="drop-area">
-        <p>Arraste e solte suas imagens aqui ou clique para selecionar arquivos.</p>
+    <h1>Upload de Imagens para GitHub</h1>
+    <div id="drop-area">
+        <h2>Arraste e solte suas imagens aqui</h2>
+        <input type="file" id="fileElem" multiple accept="image/*" onchange="handleFiles(this.files)" />
+        <label for="fileElem">ou selecione arquivos</label>
+        <div id="gallery"></div>
     </div>
-    <input type="file" id="images" accept="image/*" multiple required style="display:none;">
-    <button id="upload-button" style="display:none;">Enviar</button>
-    <div id="file-list"></div>
+    <button id="uploadBtn">Fazer Upload</button>
     <div id="result"></div>
-
-    <script src="js/upload-image-folheto-sn.js"></script>
+    <script src="upload-image-folheto-sn.js"></script>
 </body>
 </html>

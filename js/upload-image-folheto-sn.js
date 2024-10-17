@@ -1,104 +1,60 @@
-const fileInput = document.getElementById('images');
-const fileListDiv = document.getElementById('file-list');
 const dropArea = document.getElementById('drop-area');
-const uploadButton = document.getElementById('upload-button');
+const uploadBtn = document.getElementById('uploadBtn');
+const gallery = document.getElementById('gallery');
+const resultDiv = document.getElementById('result');
+let filesToUpload = [];
 
-// Adiciona eventos para arrastar e soltar
 dropArea.addEventListener('dragover', (event) => {
-    event.preventDefault(); // Impede o comportamento padrão
-    dropArea.classList.add('hover'); // Adiciona estilo quando arrastando
+    event.preventDefault();
+    dropArea.classList.add('active');
 });
 
 dropArea.addEventListener('dragleave', () => {
-    dropArea.classList.remove('hover'); // Remove o estilo quando sai
+    dropArea.classList.remove('active');
 });
 
 dropArea.addEventListener('drop', (event) => {
     event.preventDefault();
-    dropArea.classList.remove('hover');
-    const files = event.dataTransfer.files;
-    handleFiles(files); // Processa os arquivos arrastados
-});
-
-dropArea.addEventListener('click', () => {
-    fileInput.click(); // Abre o seletor de arquivos ao clicar na área
-});
-
-fileInput.addEventListener('change', (event) => {
-    const files = event.target.files;
-    handleFiles(files); // Processa os arquivos selecionados
+    dropArea.classList.remove('active');
+    handleFiles(event.dataTransfer.files);
 });
 
 function handleFiles(files) {
     for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const fileItem = document.createElement('div');
-        fileItem.className = 'file-item';
+        filesToUpload.push(files[i]);
+        displayFile(files[i]);
+    }
+}
 
-        // Cria uma miniatura da imagem
-        const img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
-        img.className = 'thumbnail';
-        
-        fileItem.innerHTML = `
-            ${file.name}
-            <button type="button" onclick="removeFile(${i})">Remover</button>
+function displayFile(file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        const thumbnail = document.createElement('div');
+        thumbnail.classList.add('thumbnail');
+        thumbnail.innerHTML = `
+            <img src="${event.target.result}" alt="${file.name}">
+            <p>${file.name}</p>
+            <button onclick="removeFile('${file.name}')">Remover</button>
         `;
-        fileItem.prepend(img); // Adiciona a miniatura antes do nome do arquivo
-        fileListDiv.appendChild(fileItem);
-    }
-    uploadButton.style.display = 'inline'; // Mostra o botão de upload
+        gallery.appendChild(thumbnail);
+    };
+    reader.readAsDataURL(file);
 }
 
-function removeFile(index) {
-    const dt = new DataTransfer();
-    const files = fileInput.files;
-
-    for (let i = 0; i < files.length; i++) {
-        if (i !== index) {
-            dt.items.add(files[i]);
-        }
-    }
-
-    fileInput.files = dt.files; // Atualiza os arquivos no input
-    updateFileList(); // Atualiza a lista de arquivos
+function removeFile(fileName) {
+    filesToUpload = filesToUpload.filter(file => file.name !== fileName);
+    gallery.innerHTML = ''; // Limpa a galeria
+    filesToUpload.forEach(file => displayFile(file)); // Redesenha a galeria
 }
 
-uploadButton.addEventListener('click', async function() {
-    const files = fileInput.files;
-    const resultsDiv = document.getElementById('result');
-    resultsDiv.innerHTML = ''; // Limpa resultados anteriores
-
-    for (const file of files) {
-        const base64 = await getBase64(file);
-        try {
-            const response = await fetch(`https://api.github.com/repos/GSN-Ecom/folhetoSN/contents/folheto-sn/${file.name}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': 'token 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', // Seu token de acesso
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: 'Upload de imagem',
-                    content: base64 // Converte a imagem para base64
-                })
-            });
-            const data = await response.json();
-            if (data.content) {
-                resultsDiv.innerHTML += `
-                    <p>${file.name}: <a href="${data.content.html_url}" target="_blank">${data.content.html_url}</a></p>
-                `;
-            } else {
-                console.error('Erro ao fazer upload:', data);
-            }
-        } catch (error) {
-            console.error('Erro:', error);
-        }
+uploadBtn.addEventListener('click', async () => {
+    for (const file of filesToUpload) {
+        const base64 = await toBase64(file);
+        await uploadImage(file, base64);
     }
 });
 
-// Função para converter a imagem para Base64
-function getBase64(file) {
+function toBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -107,25 +63,30 @@ function getBase64(file) {
     });
 }
 
-function updateFileList() {
-    fileListDiv.innerHTML = ''; // Limpa a lista anterior
+async function uploadImage(file, base64) {
+    try {
+        const response = await fetch(`https://api.github.com/repos/GSN-Ecom/folhetoSN/contents/folheto-sn/${file.name}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'token SEU_TOKEN_DE_ACESSO', // Substitua pelo seu token
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: 'Upload de imagem',
+                content: base64
+            })
+        });
 
-    const files = fileInput.files;
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const fileItem = document.createElement('div');
-        fileItem.className = 'file-item';
-
-        // Cria uma miniatura da imagem
-        const img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
-        img.className = 'thumbnail';
-        
-        fileItem.innerHTML = `
-            ${file.name}
-            <button type="button" onclick="removeFile(${i})">Remover</button>
-        `;
-        fileItem.prepend(img); // Adiciona a miniatura antes do nome do arquivo
-        fileListDiv.appendChild(fileItem);
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Erro ao fazer upload:', errorData);
+            resultDiv.innerHTML += `<p>Erro ao fazer upload de ${file.name}: ${errorData.message}</p>`;
+        } else {
+            const jsonData = await response.json();
+            resultDiv.innerHTML += `<p>${file.name} foi carregado com sucesso! <a href="${jsonData.content.html_url}" target="_blank">Ver imagem</a></p>`;
+        }
+    } catch (error) {
+        console.error('Erro inesperado:', error);
+        resultDiv.innerHTML += `<p>Erro inesperado ao fazer upload de ${file.name}.</p>`;
     }
 }
