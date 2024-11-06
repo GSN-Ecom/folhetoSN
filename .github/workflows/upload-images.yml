@@ -1,0 +1,36 @@
+name: Upload Images to GitHub Repository
+
+# Evento que dispara o workflow
+on:
+  workflow_dispatch:
+    inputs:
+      file_path:
+        description: 'Path of the file to upload'
+        required: true
+      file_name:
+        description: 'Name of the file in the repository'
+        required: true
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Upload Image
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
+        run: |
+          # Caminho e nome do arquivo no repositório
+          FILE_PATH="${{ github.event.inputs.file_path }}"
+          FILE_NAME="${{ github.event.inputs.file_name }}"
+          
+          # Codificar o arquivo em base64 e criar o payload para o GitHub API
+          BASE64_CONTENT=$(base64 "$FILE_PATH")
+          PAYLOAD=$(jq -n --arg message "Upload image" --arg content "$BASE64_CONTENT" '{"message": $message, "content": $content}')
+          
+          # Fazer upload usando a API do GitHub
+          curl -X PUT -H "Authorization: token $REPO_ACCESS_TOKEN" -d "$PAYLOAD" \
+               "https://api.github.com/repos/GSN-Ecom/folhetoSN/contents/folheto-sn/$FILE_NAME"
